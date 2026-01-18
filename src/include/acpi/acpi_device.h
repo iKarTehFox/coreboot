@@ -429,15 +429,13 @@ void acpi_device_write_uart(const struct acpi_uart *uart);
 
 /* GPIO/timing information for the power on/off sequences */
 struct acpi_power_res_params {
-	/* GPIO used to take device out of reset or to put it into reset. */
+	/* GPIO used for device reset. If provided, a _RST method will be generated
+	 * in the power resource that asserts and de-asserts the reset GPIO.
+	 */
 	struct acpi_gpio *reset_gpio;
-	/* Delay to be inserted after device is taken out of reset.
-	 * (_ON method delay)
-	 */
+	/* Delay used in _RST method after de-asserting reset. */
 	unsigned int reset_delay_ms;
-	/* Delay to be inserted after device is put into reset.
-	 * (_OFF method delay)
-	 */
+	/* Delay used in _RST method after asserting reset. */
 	unsigned int reset_off_delay_ms;
 	/* GPIO used to enable device. */
 	struct acpi_gpio *enable_gpio;

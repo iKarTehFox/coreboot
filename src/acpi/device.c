@@ -723,8 +723,6 @@ void acpi_device_add_power_res(const struct acpi_power_res_params *params)
 		acpigen_write_return_op(ZERO_OP);
 		acpigen_write_if_end();
 	}
-	if (reset_gpio)
-		acpigen_enable_tx_gpio(params->reset_gpio);
 	if (enable_gpio) {
 		acpigen_enable_tx_gpio(params->enable_gpio);
 		if (params->enable_delay_ms)
@@ -749,11 +747,6 @@ void acpi_device_add_power_res(const struct acpi_power_res_params *params)
 		if (params->stop_off_delay_ms)
 			acpigen_write_sleep(params->stop_off_delay_ms);
 	}
-	if (reset_gpio) {
-		acpigen_enable_tx_gpio(params->reset_gpio);
-		if (params->reset_off_delay_ms)
-			acpigen_write_sleep(params->reset_off_delay_ms);
-	}
 	if (enable_gpio) {
 		acpigen_disable_tx_gpio(params->enable_gpio);
 		if (params->enable_off_delay_ms)
@@ -761,7 +754,29 @@ void acpi_device_add_power_res(const struct acpi_power_res_params *params)
 	}
 	acpigen_pop_len();		/* _OFF method */
 
+	/* Method (_RST, 0, Serialized) - Device Reset */
+	if (reset_gpio) {
+		acpigen_write_method_serialized("_RST", 0);
+		/* Assert reset GPIO */
+		acpigen_enable_tx_gpio(params->reset_gpio);
+		if (params->reset_off_delay_ms)
+			acpigen_write_sleep(params->reset_off_delay_ms);
+		/* De-assert reset GPIO */
+		acpigen_disable_tx_gpio(params->reset_gpio);
+		if (params->reset_delay_ms)
+			acpigen_write_sleep(params->reset_delay_ms);
+		acpigen_pop_len();	/* _RST method */
+	}
+
 	acpigen_pop_len();		/* PowerResource PR## */
+
+	/* Generate _PRR (Power Resource for Reset) if reset GPIO is present */
+	if (reset_gpio) {
+		acpigen_write_name("_PRR");
+		acpigen_write_package(1);
+		acpigen_emit_namestring(pr_name);
+		acpigen_pop_len();	/* Package */
+	}
 }
 
 static void acpi_dp_write_array(const struct acpi_dp *array);
