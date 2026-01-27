@@ -403,7 +403,7 @@ static enum cb_err ec_sync(void)
 	if (need_update && image_type == EC_IMAGE_RW) {
 		int attempts;
 
-		printk(BIOS_DEBUG, "ChromeEC SW Sync: EC_RW needs update but in RW; sysjumping to RO\n");
+		printk(BIOS_DEBUG, "ChromeEC SW Sync: EC_RW needs update but in RW; switching to RO\n");
 		google_chromeec_jump_to_ro();
 
 		for (attempts = 0; attempts < CROS_EC_JUMP_RETRY_COUNT; attempts++) {
@@ -414,8 +414,7 @@ static enum cb_err ec_sync(void)
 		}
 
 		if (image_type != EC_IMAGE_RO) {
-			printk(BIOS_ERR, "ChromeEC SW Sync: EC failed to switch to RO image\n");
-			printk(BIOS_DEBUG, "ChromeEC SW Sync: Will try to update in RW mode\n");
+			printk(BIOS_DEBUG, "ChromeEC SW Sync: EC failed to switch to RO; will update in RW and reboot\n");
 		}
 	}
 
@@ -439,21 +438,21 @@ static enum cb_err ec_sync(void)
 			goto cleanup;
 		}
 
-		/* Re-check image type after update to ensure we have current state */
-		image_type = chromeec_get_image_type();
-		/* If we updated RW in RW, reboot to take effect*/
-		if (image_type == EC_IMAGE_RW) {
-			printk(BIOS_DEBUG, "ChromeEC SW Sync: EC_RW updated in RW, rebooting to take effect\n");
-			google_chromeec_reboot(EC_REBOOT_COLD, 0);
-			mdelay(100);
-		}
-
 		/* Have EC recompute hash for new EC_RW block */
 		force_recalc = 1;
 		if (ec_hash_image(&ec_hash, &ec_hash_size, force_recalc)) {
 			printk(BIOS_ERR, "ChromeEC SW Sync: Failed to read new EC_RW hash.\n");
 			rv = CB_ERR;
 			goto cleanup;
+		}
+
+		/* Re-check image type after update to ensure we have current state */
+		image_type = chromeec_get_image_type();
+		/* If we updated RW while in RW, reboot to take effect; we'll check the hash then */
+		if (image_type == EC_IMAGE_RW) {
+			printk(BIOS_DEBUG, "ChromeEC SW Sync: EC_RW updated in RW, rebooting to take effect\n");
+			google_chromeec_reboot(EC_REBOOT_COLD, 0);
+			mdelay(100);
 		}
 
 		/* Compare new EC_RW hash to value from CBFS */
@@ -541,7 +540,7 @@ void google_chromeec_swsync(void)
 	if (perform_ec_sw_sync && ec_sync() != CB_SUCCESS) {
 		printk(BIOS_ERR, "ChromeEC SW Sync: EC SW SYNC FAILED\n");
 	} else if (jump_to_rw && chromeec_get_image_type() != EC_IMAGE_RW) {
-		/* EC RW image is up to date, switch to it if not already*/
+		/* EC RW image is up to date, switch to it if in RO */
 		printk(BIOS_DEBUG, "ChromeEC SW Sync: Jumping to EC_RW firmware\n");
 		google_chromeec_reboot(EC_REBOOT_JUMP_RW, 0);
 		mdelay(100);
