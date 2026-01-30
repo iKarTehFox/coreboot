@@ -105,6 +105,7 @@ QEMU POWER9 <emulation/qemu-power9.md>
 :maxdepth: 1
 
 Polestar G613 Pro <erying/tgl/tgl_matx.md>
+SRMJ4 (i9-13900H) <erying/srmj4.md>
 ```
 
 ## Facebook

@@ -1,0 +1,143 @@
+chip soc/intel/alderlake
+	# RPL-specific: disable package C-state demotion (W/A for S0ix issues on some SKUs)
+	register "disable_package_c_state_demotion" = "true"
+
+	register "eist_enable" = "true"
+
+	# Sagv Configuration
+	register "sagv" = "SaGv_Enabled"
+	register "RMT" = "0"
+	register "enable_c6dram" = "1"
+
+	# GPE groups: from gpe_cfg on board (0x00000432 -> GPP_A GPP_R GPD)
+	register "pmc_gpe0_dw0" = "GPP_A"
+	register "pmc_gpe0_dw1" = "GPP_R"
+	register "pmc_gpe0_dw2" = "GPD"
+
+	device domain 0 on
+		subsystemid 0x6688 0x0790 inherit
+		device ref pcie5_0	on
+			# TODO: Set clk_src/clk_req
+			register "cpu_pcie_rp[CPU_RP(2)]" = "{
+				.flags = PCIE_RP_LTR | PCIE_RP_AER | PCIE_RP_CLK_REQ_DETECT,
+			}"
+			smbios_slot_desc "SlotTypePciExpressGen5x8" "SlotLengthLong"
+					 "PCIe 5.0 x8" "SlotDataBusWidth8X"
+		end
+		device ref igpu		on
+			register "ddi_portA_config" = "1"
+			register "ddi_portB_config" = "1"
+			register "ddi_ports_config" = "{
+				[DDI_PORT_A] = DDI_ENABLE_HPD | DDI_ENABLE_DDC,
+				[DDI_PORT_B] = DDI_ENABLE_HPD | DDI_ENABLE_DDC,
+			}"
+		end
+		device ref pcie4_0	on
+			# x4 NVMe PCIe 4.0 #1 (front)
+			# TODO: Set clk_src/clk_req
+			register "cpu_pcie_rp[CPU_RP(1)]" = "{
+				.flags = PCIE_RP_LTR | PCIE_RP_AER | PCIE_RP_CLK_REQ_DETECT,
+			}"
+			smbios_slot_desc "SlotTypeM2Socket3" "SlotLengthOther"
+					 "m.2-2280 (gen4)" "SlotDataBusWidth4X"
+		end
+		device ref pcie4_1	on
+			# x4 NVMe PCIe 4.0 #2 (rear)
+			# TODO: Set clk_src/clk_req
+			register "cpu_pcie_rp[CPU_RP(3)]" = "{
+				.flags = PCIE_RP_LTR | PCIE_RP_AER | PCIE_RP_CLK_REQ_DETECT,
+			}"
+			smbios_slot_desc "SlotTypeM2Socket3" "SlotLengthOther"
+					 "m.2-2280 (gen4)" "SlotDataBusWidth4X"
+		end
+		device ref tbt_pcie_rp0	on end
+		device ref tbt_pcie_rp1	on end
+		device ref gna		on end
+		device ref tcss_xhci	on end
+		device ref xhci		on end
+		device ref shared_sram	on end
+		device ref heci1	on end
+		device ref pcie_rp5	on
+			# x4 NVMe PCIe 3.0 (front)
+			# TODO: Set clk_src/clk_req
+			register "pch_pcie_rp[PCH_RP(5)]" = "{
+				.flags = PCIE_RP_LTR | PCIE_RP_AER | PCIE_RP_CLK_REQ_DETECT,
+			}"
+			smbios_slot_desc "SlotTypeM2Socket3" "SlotLengthOther"
+					 "m.2-2280 (gen3)" "SlotDataBusWidth4X"
+		end
+		device ref pcie_rp10	on
+			# onboard Realtek RTL8125 - remapped to RP9
+			register "pch_pcie_rp[PCH_RP(10)]" = "{
+				.flags = PCIE_RP_LTR | PCIE_RP_AER | PCIE_RP_CLK_REQ_UNUSED | PCIE_RP_BUILT_IN,
+			}"
+		end
+		device ref uart0	on end
+		device ref gspi1	on end
+		device ref pch_espi	on
+			register "gen1_dec" = "0x00fc0201"
+			register "gen2_dec" = "0x007c0a01"
+			register "gen3_dec" = "0x00fc0301"
+
+			chip superio/nuvoton/nct6791d
+				# Fan/PECI: SYSFAN + CPUFAN, Smart Fan IV, PECI CPU temp
+				register "peci_enable" = "true"
+				register "FAN1.bank" = "1"
+				register "FAN1.temp_src" = "NCT6791D_FAN_TEMP_PECI0"
+				register "FAN1.stop_duty_en" = "true"
+				register "FAN1.temp" = "{ 40, 60, 75, 90 }"
+				register "FAN1.duty" = "{ 51, 102, 178, 255 }"
+				register "FAN1.temp_tolerance" = "2"
+				register "FAN1.step_up_time" = "2"
+				register "FAN1.step_down_time" = "2"
+				register "FAN1.duty_per_step_up" = "1"
+				register "FAN1.duty_per_step_down" = "1"
+				register "FAN1.crit_temp" = "100"
+				register "FAN1.crit_duty_en" = "1"
+				register "FAN1.crit_duty" = "255"
+				register "FAN1.crit_temp_tolerance" = "2"
+				register "FAN2.bank" = "2"
+				register "FAN2.temp_src" = "NCT6791D_FAN_TEMP_PECI0"
+				register "FAN2.stop_duty_en" = "true"
+				register "FAN2.temp" = "{ 40, 60, 75, 90 }"
+				register "FAN2.duty" = "{ 51, 102, 178, 255 }"
+				register "FAN2.temp_tolerance" = "2"
+				register "FAN2.step_up_time" = "2"
+				register "FAN2.step_down_time" = "2"
+				register "FAN2.duty_per_step_up" = "1"
+				register "FAN2.duty_per_step_down" = "1"
+				register "FAN2.crit_temp" = "100"
+				register "FAN2.crit_duty_en" = "1"
+				register "FAN2.crit_duty" = "255"
+				register "FAN2.crit_temp_tolerance" = "2"
+
+				device pnp 2e.1 off end		# Parallel Port
+				device pnp 2e.2 on		# UART A
+					io 0x60 = 0x03f8
+					irq 0x70 = 4
+				end
+				device pnp 2e.3 off end		# UART B
+				device pnp 2e.5 off end		# KBC
+				device pnp 2e.b on		# HWM
+					io 0x60 = 0x0a20
+					io 0x62 = 0x0a40
+					irq 0x70 = 0
+				end
+			end
+		end
+		device ref hda		on
+			subsystemid 0x10ec 0x0897
+			register "pch_hda_audio_link_hda_enable" = "1"
+			register "pch_hda_dsp_enable" = "0"
+			register "pch_hda_idisp_link_tmode" = "HDA_TMODE_8T"
+			register "pch_hda_idisp_link_frequency" = "HDA_LINKFREQ_96MHZ"
+			register "pch_hda_idisp_codec_enable" = "true"
+		end
+		device ref smbus	on end
+		device ref fast_spi	on end
+		device ref gbe		on end	# onboard Intel I219-V
+		chip drivers/crb
+			device mmio 0xfed40000 on end
+		end
+	end
+end

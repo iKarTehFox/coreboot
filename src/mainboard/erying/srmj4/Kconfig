@@ -1,0 +1,45 @@
+## SPDX-License-Identifier: GPL-2.0-only
+
+if BOARD_ERYING_SRMJ4
+
+config BOARD_SPECIFIC_OPTIONS
+	def_bool y
+	select BOARD_ROMSIZE_KB_16384
+	select CRB_TPM
+	select DRIVERS_UART_8250IO
+	select HAVE_ACPI_TABLES
+	select HAVE_INTEL_PTT
+	select INTEL_GMA_HAVE_VBT
+	select MAINBOARD_USES_IFD_GBE_REGION
+	select SOC_INTEL_ALDERLAKE_PCH_P
+	select SOC_INTEL_COMMON_BLOCK_HDA_VERB
+	select SOC_INTEL_COMMON_BLOCK_MEMINIT
+	select SOC_INTEL_RAPTORLAKE
+	select SUPERIO_NUVOTON_NCT6791D
+	select SUPERIO_NUVOTON_NCT6791D_HWM
+
+config MAINBOARD_DIR
+	default "erying/srmj4"
+
+config MAINBOARD_PART_NUMBER
+	default "SRMJ4 (i9-13900H)"
+
+config MAINBOARD_SMBIOS_PRODUCT_NAME
+	default "SRMJ4"
+
+config CBFS_SIZE
+	default 0xa98000
+
+config PCIEXP_ASPM
+	default n
+
+config PCIEXP_CLK_PM
+	default n
+
+config PCIEXP_L1_SUB_STATE
+	default n
+
+config INTEL_GMA_VBT_FILE
+	default "src/mainboard/\$(CONFIG_MAINBOARD_DIR)/data.vbt"
+
+endif

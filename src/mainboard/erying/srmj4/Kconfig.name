@@ -1,0 +1,4 @@
+## SPDX-License-Identifier: GPL-2.0-only
+
+config BOARD_ERYING_SRMJ4
+	bool "SRMJ4 (i9-13900H)"

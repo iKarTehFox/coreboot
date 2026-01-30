@@ -1,0 +1,5 @@
+# Minimal defconfig for Erying SRMJ4 (i9-13900H). Use for build testing.
+#   cp configs/config.erying_srmj4.defconfig .config && make olddefconfig && make
+CONFIG_VENDOR_ERYING=y
+CONFIG_BOARD_ERYING_SRMJ4=y
+CONFIG_PAYLOAD_NONE=y

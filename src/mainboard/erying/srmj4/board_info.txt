@@ -1,0 +1,9 @@
+Board name: Erying SRMJ4 (i9-13900H)
+Release year: 2023
+Category: desktop
+ROM IC: W25Q128.V
+ROM package: SOIC-8
+ROM socketed: no
+Flashrom support: yes
+
+Documentation: Documentation/mainboard/erying/srmj4.md
