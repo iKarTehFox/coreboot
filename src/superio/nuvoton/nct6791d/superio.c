@@ -6,7 +6,9 @@
 #include <superio/conf_mode.h>
 #include <superio/common/ssdt.h>
 #include <acpi/acpi.h>
+#include "chip.h"
 #include "nct6791d.h"
+#include "nct6791d_hwm.h"
 
 static void nct6791d_init(struct device *dev)
 {
@@ -17,12 +19,21 @@ static void nct6791d_init(struct device *dev)
 	case NCT6791D_KBC:
 		pc_keyboard_init(NO_AUX_DEVICE);
 		break;
+
+	case NCT6791D_HWM_FPLED:
+		if (CONFIG(SUPERIO_NUVOTON_NCT6791D_HWM)) {
+			const struct superio_nuvoton_nct6791d_config *conf = dev->chip_info;
+			const struct resource *res = probe_resource(dev, PNP_IDX_IO0);
+			if (conf && res && res->base)
+				nct6791d_hwm_init(res->base, conf);
+		}
+		break;
 	}
 }
 
 #if CONFIG(HAVE_ACPI_TABLES)
 /* Provide ACPI HIDs for generic Super I/O SSDT */
-static const char *nct6791d_acpi_hid(const struct device *dev)
+static const char* nct6791d_acpi_hid(const struct device *dev)
 {
 	if ((dev->path.type != DEVICE_PATH_PNP) ||
 		(dev->path.pnp.port == 0) ||

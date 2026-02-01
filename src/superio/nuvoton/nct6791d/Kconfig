@@ -3,3 +3,12 @@
 config SUPERIO_NUVOTON_NCT6791D
 	bool
 	select SUPERIO_NUVOTON_COMMON_PRE_RAM
+
+config SUPERIO_NUVOTON_NCT6791D_HWM
+	bool "NCT6791D Hardware Monitor (PECI, Smart Fan IV)"
+	default n
+	depends on SUPERIO_NUVOTON_NCT6791D
+	help
+	  Enable PECI (Intel CPU temperature) and Smart Fan IV fan control
+	  for SYSFAN, CPUFAN, and AUXFAN0. Requires peci_enable and fan
+	  configuration in the chip devicetree.
